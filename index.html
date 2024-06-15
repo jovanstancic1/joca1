@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igrica: Memory</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
+    #game-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .memory-card {
+        width: 100px;
+        height: 100px;
+        margin: 5px;
+        display: inline-block;
+        perspective: 1000px;
+    }
+    .memory-card > div {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        line-height: 100px;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        backface-visibility: hidden;
+        position: relative;
+    }
+    .memory-card .back {
+        background-color: #007bff;
+    }
+    .memory-card .front {
+        background-color: #0056b3;
+        transform: rotateY(180deg);
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+</style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Igrica: Memory</h1>
+        <div id="memory-board"></div>
+        <button onclick="startGame()">Počni igru</button>
+        <p id="game-result"></p>
+    </div>
+
+    <script>
+        const images = [
+            '🍎', '🍎',
+            '🍌', '🍌',
+            '🍒', '🍒',
+            '🍇', '🍇',
+            '🍍', '🍍',
+            '🥭', '🥭',
+            '🍉', '🍉',
+            '🥝', '🥝'
+        ];
+
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedCards = [];
+
+        function startGame() {
+            document.getElementById('memory-board').innerHTML = '';
+            memoryCards = shuffle(images.concat(images));
+            flippedCards = [];
+            matchedCards = [];
+            displayCards();
+            document.getElementById('game-result').textContent = '';
+        }
+
+        function displayCards() {
+            const board = document.getElementById('memory-board');
+            memoryCards.forEach(function(image, index) {
+                const card = document.createElement('div');
+                card.classList.add('memory-card');
+                card.innerHTML = `<div class="front"></div><div class="back">${image}</div>`;
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('matched') && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                flippedCards.push(this);
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const firstCard = flippedCards[0].querySelector('.back').textContent;
+            const secondCard = flippedCards[1].querySelector('.back').textContent;
+
+            if (firstCard === secondCard) {
+                flippedCards.forEach(card => card.classList.add('matched'));
+                matchedCards.push(...flippedCards);
+                flippedCards = [];
+                if (matchedCards.length === memoryCards.length) {
+                    document.getElementById('game-result').textContent = 'Čestitamo! Pobedili ste!';
+                }
+            } else {
+                flippedCards.forEach(card => card.classList.remove('flipped'));
+                flippedCards = [];
+            }
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, temporaryValue, randomIndex;
+
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+
+            return array;
+        }
+    </script>
+</body>
+</html>
